@@ -37,9 +37,39 @@ option(LEVELDB_INSTALL "Install LevelDB's header and library" ON)
 include(CheckIncludeFile)
 check_include_file("unistd.h" HAVE_UNISTD_H)
 
+string(REGEX MATCH "[^/]+$" CONFIG_NAME ${CMAKE_INSTALL_PREFIX})
+
+add_library(crc32c STATIC IMPORTED)
+if (WIN32)
+  set(crc32c_Path "${CMAKE_SOURCE_DIR}/../crc32c/out/install/${CONFIG_NAME}")
+  set_target_properties(crc32c PROPERTIES
+    IMPORTED_LOCATION "${crc32c_Path}/lib/crc32c.lib")
+  target_include_directories(crc32c INTERFACE "${crc32c_Path}/include/crc32c/")
+else (WIN32)
+  set(crc32c_Path "${CMAKE_SOURCE_DIR}/../../../crc32c/6aa46664-c0e0-498c-8bf7-1d087f918214/out/install/${CONFIG_NAME}")
+  set_target_properties(crc32c PROPERTIES
+    IMPORTED_LOCATION "${crc32c_Path}/lib/libcrc32c.a")
+  target_include_directories(crc32c INTERFACE "${crc32c_Path}/include/crc32c/")
+endif (WIN32)
+
+add_library(snappy STATIC IMPORTED)
+if (WIN32)
+  set(snappy_Path "${CMAKE_SOURCE_DIR}/../snappy/out/install/${CONFIG_NAME}")
+  set_target_properties(snappy PROPERTIES
+    IMPORTED_LOCATION "${snappy_Path}/lib/snappy.lib")
+  target_include_directories(snappy INTERFACE "${snappy_Path}/include/")
+else (WIN32)
+  set(snappy_Path "${CMAKE_SOURCE_DIR}/../../../snappy/d27b1075-087c-4776-9aa9-d63276d304d4/out/install/${CONFIG_NAME}")
+  set_target_properties(snappy PROPERTIES
+    IMPORTED_LOCATION "${snappy_Path}/lib/libsnappy.a")
+  target_include_directories(snappy INTERFACE "${snappy_Path}/include/")
+endif (WIN32)
+
 include(CheckLibraryExists)
-check_library_exists(crc32c crc32c_value "" HAVE_CRC32C)
-check_library_exists(snappy snappy_compress "" HAVE_SNAPPY)
+# check_library_exists(crc32c crc32c_value "" HAVE_CRC32C)
+set(HAVE_CRC32C 1)
+# check_library_exists(snappy snappy_compress "" HAVE_SNAPPY)
+set(HAVE_SNAPPY 1)
 check_library_exists(tcmalloc malloc "" HAVE_TCMALLOC)
 
 include(CheckCXXSymbolExists)
